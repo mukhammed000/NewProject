@@ -17,4 +17,6 @@ type AuthService interface {
 	ChangeEmail(req *auth.ChangeEmailRequest) (*auth.InfoResponse, error)
 	VerifyEmail(req *auth.VerifyEmailRequest) (*auth.InfoResponse, error)
 	EnterEmail(req *auth.EmailRequest) (*auth.InfoResponse, error)
+	ValidateToken(req *auth.ValidateTokenRequest) (*auth.InfoResponse, error)
+	RefreshToken(req *auth.RefreshTokenRequest) (*auth.InfoResponse, error)
 }

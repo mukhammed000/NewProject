@@ -3,6 +3,7 @@ package handler
 import (
 	"api/api/token"
 	pb "api/genproto/auth"
+	"context"
 	"net/http"
 	"time"
 
@@ -273,4 +274,60 @@ func (h *Handler) EnterEmail(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, response)
+}
+
+// ValidateToken godoc
+// @Summary Validate an access token
+// @Description Validate a user's access token
+// @Security BearerAuth
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body pb.ValidateTokenRequest true "Token validation details"
+// @Success 200 {object} pb.InfoResponse
+// @Failure 400 {string} string "Bad Request"
+// @Failure 500 {string} string "Internal Server Error"
+// @Router /auth/validateToken [post]
+func (h *Handler) ValidateToken(c *gin.Context) {
+	var req pb.ValidateTokenRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	res, err := h.Auth.ValidateToken(context.Background(), &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
+// RefreshToken godoc
+// @Summary Refresh an access token
+// @Description Refresh a user's access token using the refresh token
+// @Security BearerAuth
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body pb.RefreshTokenRequest true "Token refresh details"
+// @Success 200 {object} pb.InfoResponse
+// @Failure 400 {string} string "Bad Request"
+// @Failure 500 {string} string "Internal Server Error"
+// @Router /auth/refreshToken [post]
+func (h *Handler) RefreshToken(c *gin.Context) {
+	var req pb.RefreshTokenRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	res, err := h.Auth.RefreshToken(context.Background(), &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
 }

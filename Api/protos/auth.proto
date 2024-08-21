@@ -8,11 +8,21 @@ service AuthService {
     rpc SignUp(Users) returns (SignUpResponse);
     rpc LogIn(LogInRequest) returns (LogInResponse);
     rpc ChangePassword(ChangePasswordRequest) returns (InfoResponse);
-    rpc ForgetPassword(ForgetPasswordRequest) returns (InfoResponse); // Redis
-    rpc ResetPassword(ResetPasswordRequest) returns (InfoResponse); // Redis to Service
-    rpc ChangeEmail(ChangeEmailRequest) returns (InfoResponse); // Redis to Service
-    rpc VerifyEmail(VerifyEmailRequest) returns (InfoResponse); // Redis to Service
-    rpc EnterEmail(EmailRequest) returns (InfoResponse); // Redis to Service
+    rpc ForgetPassword(ForgetPasswordRequest) returns (InfoResponse);
+    rpc ResetPassword(ResetPasswordRequest) returns (InfoResponse); 
+    rpc ChangeEmail(ChangeEmailRequest) returns (InfoResponse); 
+    rpc VerifyEmail(VerifyEmailRequest) returns (InfoResponse); 
+    rpc EnterEmail(EmailRequest) returns (InfoResponse); 
+    rpc ValidateToken(ValidateTokenRequest) returns (InfoResponse);
+    rpc RefreshToken(RefreshTokenRequest) returns (InfoResponse);
+}
+
+message ValidateTokenRequest {
+    string token = 1;
+}
+
+message RefreshTokenRequest {
+    string refresh_token = 1;
 }
 
 message Users {

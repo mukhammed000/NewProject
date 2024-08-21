@@ -90,3 +90,21 @@ func (s *AuthService) EnterEmail(ctx context.Context, req *pb.EmailRequest) (*pb
 	}
 	return resp, nil
 }
+
+func (s *AuthService) ValidateToken(ctx context.Context, req *pb.ValidateTokenRequest) (*pb.InfoResponse, error) {
+	resp, err := s.stg.Auth().ValidateToken(req)
+	if err != nil {
+		log.Println("Error validating token: ", err)
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (s *AuthService) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.InfoResponse, error) {
+	resp, err := s.stg.Auth().RefreshToken(req)
+	if err != nil {
+		log.Println("Error refreshing token: ", err)
+		return nil, err
+	}
+	return resp, nil
+}

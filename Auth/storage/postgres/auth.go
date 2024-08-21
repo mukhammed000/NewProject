@@ -6,6 +6,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -274,6 +276,53 @@ func (s *AuthStorage) VerifyEmail(req *auth.VerifyEmailRequest) (*auth.InfoRespo
 		Message: "Email verified successfully",
 		Success: true,
 	}, nil
+}
+
+func (u *AuthStorage) ValidateToken(req *auth.ValidateTokenRequest) (*auth.InfoResponse, error) {
+	var expiresAt string
+
+	query := `
+		SELECT expires_at
+		FROM tokens
+		WHERE access_token = $1
+	`
+
+	err := u.db.QueryRow(query, req.Token).Scan(&expiresAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return &auth.InfoResponse{
+				Message: "Token does not exist in the database!",
+				Success: false,
+			}, nil
+		}
+		return nil, err
+	}
+
+	expiresAt = strings.Split(expiresAt, " m=")[0]
+
+	const layout = "2006-01-02 15:04:05.999999999 -0700 MST"
+
+	expiredAt, err := time.Parse(layout, expiresAt)
+	if err != nil {
+		log.Fatalln("Error while parsing the time", err)
+	}
+
+	if time.Now().After(expiredAt) {
+		return &auth.InfoResponse{
+			Message: "Token is already expired",
+			Success: false,
+		}, nil
+	}
+
+	return &auth.InfoResponse{
+		Message: "Token is valid",
+		Success: true,
+	}, nil
+}
+
+func (u *AuthStorage) RefreshToken(req *auth.RefreshTokenRequest) (*auth.InfoResponse, error) {
+	// This method is never be used
+	return nil, nil
 }
 
 func (s *AuthStorage) EnterEmail(req *auth.EmailRequest) (*auth.InfoResponse, error) {

@@ -53,6 +53,8 @@ func NewGin(h *handler.Handler) *gin.Engine {
 		auth.POST("/change-email", h.ChangeEmail)
 		auth.POST("/verify-email", h.VerifyEmail)
 		auth.POST("/enter-email", h.EnterEmail)
+		auth.POST("/validateToken", h.ValidateToken)
+		auth.POST("/refreshToken", h.RefreshToken)
 	}
 
 	swaggerURL := ginSwagger.URL("http://localhost:8080/swagger/doc.json")

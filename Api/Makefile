@@ -1,5 +1,8 @@
 CURRENT_DIR=$(shell pwd)
 
+run:
+	go run main.go
+
 proto-gen:
 	./scripts/gen-proto.sh ${CURRENT_DIR}
 

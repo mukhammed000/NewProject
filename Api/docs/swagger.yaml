@@ -51,6 +51,11 @@ definitions:
       user_id:
         type: string
     type: object
+  auth.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    type: object
   auth.ResetPasswordRequest:
     properties:
       email:
@@ -84,6 +89,11 @@ definitions:
       refresh_token:
         type: string
       user_id:
+        type: string
+    type: object
+  auth.ValidateTokenRequest:
+    properties:
+      token:
         type: string
     type: object
   auth.VerifyEmailRequest:
@@ -249,6 +259,38 @@ paths:
       summary: Log in a user
       tags:
       - Auth
+  /auth/refreshToken:
+    post:
+      consumes:
+      - application/json
+      description: Refresh a user's access token using the refresh token
+      parameters:
+      - description: Token refresh details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.InfoResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Refresh an access token
+      tags:
+      - Auth
   /auth/reset-password:
     post:
       consumes:
@@ -309,6 +351,38 @@ paths:
       security:
       - BearerAuth: []
       summary: Register a new user
+      tags:
+      - Auth
+  /auth/validateToken:
+    post:
+      consumes:
+      - application/json
+      description: Validate a user's access token
+      parameters:
+      - description: Token validation details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.ValidateTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.InfoResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Validate an access token
       tags:
       - Auth
   /auth/verify-email:

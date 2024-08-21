@@ -321,7 +321,6 @@ func (u *AuthStorage) ValidateToken(req *auth.ValidateTokenRequest) (*auth.InfoR
 }
 
 func (u *AuthStorage) RefreshToken(req *auth.RefreshTokenRequest) (*auth.InfoResponse, error) {
-	// This method is never be used
 	return nil, nil
 }
 

@@ -68,6 +68,7 @@ func (h *Handler) SignUp(ctx *gin.Context) {
 // LogIn godoc
 // @Summary Log in a user
 // @Description Log in a user with email and password
+// @Security BearerAuth
 // @Tags Auth
 // @Accept json
 // @Produce json
@@ -95,6 +96,7 @@ func (h *Handler) LogIn(ctx *gin.Context) {
 // ChangePassword godoc
 // @Summary Change user password
 // @Description Change password for a user
+// @Security BearerAuth
 // @Tags Auth
 // @Accept json
 // @Produce json
@@ -124,6 +126,7 @@ func (h *Handler) ChangePassword(ctx *gin.Context) {
 // ForgetPassword godoc
 // @Summary Initiate password reset
 // @Description Request a password reset email
+// @Security BearerAuth
 // @Tags Auth
 // @Accept json
 // @Produce json
@@ -150,6 +153,7 @@ func (h *Handler) ForgetPassword(ctx *gin.Context) {
 // ResetPassword godoc
 // @Summary Reset user password
 // @Description Reset a user's password using a temporary password
+// @Security BearerAuth
 // @Tags Auth
 // @Accept json
 // @Produce json
@@ -182,6 +186,7 @@ func (h *Handler) ResetPassword(ctx *gin.Context) {
 // ChangeEmail godoc
 // @Summary Change user email
 // @Description Change the email address of a user
+// @Security BearerAuth
 // @Tags Auth
 // @Accept json
 // @Produce json
@@ -217,6 +222,7 @@ func (h *Handler) ChangeEmail(ctx *gin.Context) {
 // VerifyEmail godoc
 // @Summary Verify user email
 // @Description Verify a user's email address with a verification code
+// @Security BearerAuth
 // @Tags Auth
 // @Accept json
 // @Produce json
@@ -252,6 +258,7 @@ func (h *Handler) VerifyEmail(ctx *gin.Context) {
 // EnterEmail godoc
 // @Summary Enter user email
 // @Description Enter an email address for various purposes (e.g., account recovery)
+// @Security BearerAuth
 // @Tags Auth
 // @Accept json
 // @Produce json

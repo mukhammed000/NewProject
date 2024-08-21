@@ -17,6 +17,11 @@ const docTemplate = `{
     "paths": {
         "/auth/change-email": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Change the email address of a user",
                 "consumes": [
                     "application/json"
@@ -63,6 +68,11 @@ const docTemplate = `{
         },
         "/auth/change-password": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Change password for a user",
                 "consumes": [
                     "application/json"
@@ -109,6 +119,11 @@ const docTemplate = `{
         },
         "/auth/enter-email": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Enter an email address for various purposes (e.g., account recovery)",
                 "consumes": [
                     "application/json"
@@ -155,6 +170,11 @@ const docTemplate = `{
         },
         "/auth/forget-password": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Request a password reset email",
                 "consumes": [
                     "application/json"
@@ -201,6 +221,11 @@ const docTemplate = `{
         },
         "/auth/login": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Log in a user with email and password",
                 "consumes": [
                     "application/json"
@@ -298,6 +323,11 @@ const docTemplate = `{
         },
         "/auth/reset-password": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Reset a user's password using a temporary password",
                 "consumes": [
                     "application/json"
@@ -446,6 +476,11 @@ const docTemplate = `{
         },
         "/auth/verify-email": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Verify a user's email address with a verification code",
                 "consumes": [
                     "application/json"

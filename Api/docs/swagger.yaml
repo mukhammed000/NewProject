@@ -136,6 +136,8 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: Change user email
       tags:
       - Auth
@@ -166,6 +168,8 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: Change user password
       tags:
       - Auth
@@ -196,6 +200,8 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: Enter user email
       tags:
       - Auth
@@ -226,6 +232,8 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: Initiate password reset
       tags:
       - Auth
@@ -256,6 +264,8 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: Log in a user
       tags:
       - Auth
@@ -318,6 +328,8 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: Reset user password
       tags:
       - Auth
@@ -412,6 +424,8 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: Verify user email
       tags:
       - Auth

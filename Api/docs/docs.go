@@ -641,16 +641,13 @@ const docTemplate = `{
                 "first_name": {
                     "type": "string"
                 },
-                "gender": {
-                    "type": "string"
-                },
                 "last_name": {
                     "type": "string"
                 },
                 "password": {
                     "type": "string"
                 },
-                "registration_code": {
+                "phone_number": {
                     "type": "string"
                 }
             }

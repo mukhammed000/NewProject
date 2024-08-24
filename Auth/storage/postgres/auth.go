@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -36,39 +35,47 @@ func (s *AuthStorage) SignUp(req *auth.Users) (*auth.SignUpResponse, error) {
 
 	hashedPassword, err := hashPassword(req.Password)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("failed to hash password: %v", err)
 	}
 
 	userQuery := `
-		INSERT INTO USERS (
-			user_id, first_name, last_name, email, gender, password, role, date_of_birth, created_at, updated_at
+		INSERT INTO users (
+			first_name, last_name, email, password, date_of_birth, phone_number
 		) VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+			$1, $2, $3, $4, $5, $6
 		)
+		RETURNING id
 	`
 
-	_, err = s.db.ExecContext(
+	var userId string
+
+	err = s.db.QueryRowContext(
 		context.TODO(),
 		userQuery,
-		req.UserId, req.FirstName, req.LastName, req.Email, req.Gender, hashedPassword, req.Role, req.DateOfBirth, req.CreatedAt, req.UpdatedAt,
-	)
+		req.FirstName, req.LastName, req.Email, hashedPassword, req.DateOfBirth, req.PhoneNumber,
+	).Scan(&userId)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to insert user: %v", err)
 	}
 
+	accessToken := req.AccessToken   // Or your token generation logic
+	refreshToken := req.RefreshToken // Or your token generation logic
+	expiresAt := time.Now().Add(15 * time.Minute).Format(time.RFC3339)
+
+	// SQL query to insert tokens
 	tokenQuery := `
-		INSERT INTO TOKENS (
-			user_id, token_id, access_token, refresh_token, created_at, updated_at, expires_at
+		INSERT INTO tokens (
+			token_id, user_id, access_token, refresh_token, expires_at
 		) VALUES (
-			$1, $2, $3, $4, $5, $6, $7
+			$1, $2, $3, $4, $5
 		)
 	`
 
 	_, err = s.db.ExecContext(
 		context.TODO(),
 		tokenQuery,
-		req.UserId, uuid.NewString(), req.AccessToken, req.RefreshToken, req.CreatedAt, req.UpdatedAt, time.Now().Add(15*time.Minute).String(),
+		uuid.NewString(), userId, accessToken, refreshToken, expiresAt,
 	)
 
 	if err != nil {
@@ -76,9 +83,9 @@ func (s *AuthStorage) SignUp(req *auth.Users) (*auth.SignUpResponse, error) {
 	}
 
 	response := &auth.SignUpResponse{
-		UserId:       req.UserId,
-		AccessToken:  req.AccessToken,
-		RefreshToken: req.RefreshToken,
+		UserId:       userId,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	}
 
 	return response, nil
@@ -89,7 +96,7 @@ func (u *AuthStorage) LogIn(req *auth.LogInRequest) (*auth.LogInResponse, error)
 	var userID string
 
 	query := `
-		SELECT user_id, password
+		SELECT id, password
 		FROM users
 		WHERE email = $1
 	`
@@ -143,7 +150,7 @@ func (u *AuthStorage) ChangePassword(req *auth.ChangePasswordRequest) (*auth.Inf
 	query := `
 		SELECT password
 		FROM users
-		WHERE user_id = $1 AND deleted_at = 0
+		WHERE id = $1 AND deleted_at = 0
 	`
 	err := u.db.QueryRow(query, req.UserId).Scan(&currentPasswordHash)
 	if err != nil {
@@ -166,7 +173,7 @@ func (u *AuthStorage) ChangePassword(req *auth.ChangePasswordRequest) (*auth.Inf
 	updateQuery := `
 		UPDATE users
 		SET password = $1, updated_at = CURRENT_TIMESTAMP
-		WHERE user_id = $2 AND deleted_at = 0
+		WHERE id = $2 AND deleted_at = 0
 	`
 
 	result, err := u.db.Exec(updateQuery, hashedNewPassword, req.UserId)
@@ -221,7 +228,7 @@ func (s *AuthStorage) ChangeEmail(req *auth.ChangeEmailRequest) (*auth.InfoRespo
 
 	var storedPasswordHash string
 	var userID string
-	err = tx.QueryRow(`SELECT user_id, password FROM users WHERE email = $1`, req.CurrentEmail).Scan(&userID, &storedPasswordHash)
+	err = tx.QueryRow(`SELECT id, password FROM users WHERE email = $1`, req.CurrentEmail).Scan(&userID, &storedPasswordHash)
 	if err == sql.ErrNoRows {
 		return &auth.InfoResponse{
 			Message: "Email not found",
@@ -239,7 +246,7 @@ func (s *AuthStorage) ChangeEmail(req *auth.ChangeEmailRequest) (*auth.InfoRespo
 		}, nil
 	}
 
-	_, err = tx.Exec(`UPDATE users SET email = $1, is_email_verified = $2 WHERE user_id = $3`,
+	_, err = tx.Exec(`UPDATE users SET email = $1, is_email_verified = $2 WHERE id = $3`,
 		req.NewEmail, false, userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update email: %v", err)
@@ -298,11 +305,7 @@ func (u *AuthStorage) ValidateToken(req *auth.ValidateTokenRequest) (*auth.InfoR
 		return nil, err
 	}
 
-	expiresAt = strings.Split(expiresAt, " m=")[0]
-
-	const layout = "2006-01-02 15:04:05.999999999 -0700 MST"
-
-	expiredAt, err := time.Parse(layout, expiresAt)
+	expiredAt, err := time.Parse(time.RFC3339, expiresAt)
 	if err != nil {
 		log.Fatalln("Error while parsing the time", err)
 	}

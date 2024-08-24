@@ -5,10 +5,8 @@ import (
 	pb "api/genproto/auth"
 	"context"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // RegisterUser godoc
@@ -34,20 +32,15 @@ func (h *Handler) SignUp(ctx *gin.Context) {
 
 	tkn := token.GenereteJWTToken(&user)
 
-	user.UserId = uuid.NewString()
 	user.FirstName = req.LastName
-	user.LastName = req.LastName
+	user.LastName = req.FirstName
 	user.Email = req.Email
 	reqq.Email = req.Email
-	user.Gender = req.Gender
+	user.PhoneNumber = req.PhoneNumber
 	user.Password = req.Password
-	user.Role = "user"
 	user.DateOfBirth = req.DateOfBirth
 	user.AccessToken = tkn.AccessToken
 	user.RefreshToken = tkn.RefreshToken
-	user.CreatedAt = time.Now().String()
-	user.UpdatedAt = time.Now().String()
-	user.DeletedAt = 0
 
 	reqq.Email = req.Email
 	_, err := h.UserEmailSending(&reqq)

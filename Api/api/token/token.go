@@ -1,14 +1,10 @@
 package token
 
 import (
+	"fmt"
 	"log"
-	"log/slog"
-	"net/http"
 	"strings"
 	"time"
-
-	"api/config"
-	pb "api/genproto/auth"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/spf13/cast"
@@ -28,32 +24,29 @@ type Tokens struct {
 	RefreshToken string
 }
 
-var tokenKey = config.Load().TokenKey
+var tokenKey = "my_secret_key"
 
-// CreateToken creates a new token
-func GenereteJWTToken(user *pb.Users) *Tokens {
+func GenerateJWTToken(userEmail, userRole string) *Tokens {
 	accessToken := jwt.New(jwt.SigningMethodHS256)
-	refreshToken := jwt.New(jwt.SigningMethodHS256)
-
-	claims := accessToken.Claims.(jwt.MapClaims)
-	claims["email"] = user.Email
-	claims["password"] = user
-	claims["role"] = user.Role
-	claims["iat"] = time.Now().Unix()
-	claims["exp"] = time.Now().Add(60 * time.Minute).Unix()
+	accessClaims := accessToken.Claims.(jwt.MapClaims)
+	accessClaims["email"] = userEmail
+	accessClaims["role"] = userRole
+	accessClaims["iat"] = time.Now().Unix()
+	accessClaims["exp"] = time.Now().Add(48 * time.Hour).Unix()
 	access, err := accessToken.SignedString([]byte(tokenKey))
 	if err != nil {
-		log.Fatal("error while genereting access token : ", err)
+		log.Fatal("Error while generating access token: ", err)
 	}
-	rftclaims := refreshToken.Claims.(jwt.MapClaims)
-	rftclaims["email"] = user.Email
-	rftclaims["password"] = user.Password
-	rftclaims["role"] = user.Role
-	rftclaims["iat"] = time.Now().Unix()
-	rftclaims["exp"] = time.Now().Add(24 * time.Hour).Unix()
+
+	refreshToken := jwt.New(jwt.SigningMethodHS256)
+	refreshClaims := refreshToken.Claims.(jwt.MapClaims)
+	refreshClaims["email"] = userEmail
+	refreshClaims["role"] = userRole
+	refreshClaims["iat"] = time.Now().Unix()
+	refreshClaims["exp"] = time.Now().Add(24 * time.Hour).Unix()
 	refresh, err := refreshToken.SignedString([]byte(tokenKey))
 	if err != nil {
-		log.Fatal("error while genereting refresh token : ", err)
+		log.Fatal("Error while generating refresh token: ", err)
 	}
 
 	return &Tokens{
@@ -63,22 +56,16 @@ func GenereteJWTToken(user *pb.Users) *Tokens {
 }
 
 func ExtractClaim(tokenStr string) (jwt.MapClaims, error) {
-	var (
-		token *jwt.Token
-		err   error
-	)
-
-	keyFunc := func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.Load().TokenKey), nil
-	}
-	token, err = jwt.Parse(tokenStr, keyFunc)
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		return []byte(tokenKey), nil
+	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error parsing token: %w", err)
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !(ok && token.Valid) {
-		return nil, err
+		return nil, fmt.Errorf("invalid token or claims")
 	}
 
 	return claims, nil
@@ -90,33 +77,27 @@ func (jwtHandler *JWTHandler) ExtractClaims() (jwt.MapClaims, error) {
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error parsing token: %w", err)
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !(ok && token.Valid) {
-		slog.Error("invalid jwt token")
-		return nil, err
+		return nil, fmt.Errorf("invalid token or claims")
 	}
+
 	return claims, nil
 }
 
-func GetIdFromToken(r *http.Request, cfg *config.Config) (string, int) {
-	var softToken string
-	token := r.Header.Get("Authorization")
-
-	if token == "" {
-		return "unauthorized", http.StatusUnauthorized
-	} else if strings.Contains(token, "Bearer") {
-		softToken = strings.TrimPrefix(token, "Bearer ")
-	} else {
-		softToken = token
+func GetIdFromToken(tokenStr string) (string, error) {
+	if tokenStr == "" || !strings.HasPrefix(tokenStr, "Bearer ") {
+		return "", fmt.Errorf("missing or malformed JWT")
 	}
 
-	claims, err := ExtractClaim(softToken)
+	tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
+	claims, err := ExtractClaim(tokenStr)
 	if err != nil {
-		return "unauthorized", http.StatusUnauthorized
+		return "", err
 	}
 
-	return cast.ToString(claims["email"]), 0
+	return cast.ToString(claims["email"]), nil
 }

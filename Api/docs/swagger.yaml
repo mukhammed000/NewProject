@@ -103,8 +103,8 @@ definitions:
     type: object
 info:
   contact: {}
-  description: Voting service
-  title: Voting service
+  description: Auth service
+  title: Auth service
   version: "1.0"
 paths:
   /auth/change-email:

@@ -10,6 +10,7 @@ import (
 	"api/api"
 	"api/api/handler"
 	pb "api/genproto/auth"
+	"api/kafka"
 
 	_ "api/docs"
 
@@ -27,8 +28,14 @@ func main() {
 	rdb := redis.NewClient(&redis.Options{
 		Addr: fmt.Sprintf("%s:%d", "localhost", 6379),
 	})
-	
-	h := handler.NewHandler(usc, *rdb)
+
+	kafka, err := kafka.NewKafkaProducer([]string{"kafka:9092"}) /// kafka
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	h := handler.NewHandler(usc, *rdb, kafka)
 	r := api.NewGin(h)
 
 	err = r.Run("localhost:8080")

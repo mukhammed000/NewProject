@@ -9,7 +9,9 @@ import (
 )
 
 type Config struct {
-	HTTPPort string
+	HTTPPort  string
+	KafkaHost string
+	KafkaPort int
 
 	PostgresHost     string
 	PostgresPort     int
@@ -26,6 +28,8 @@ func Load() Config {
 	config := Config{}
 
 	config.HTTPPort = cast.ToString(getOrReturnDefaultValue("HTTP_PORT", ":8081"))
+	config.KafkaHost = cast.ToString(getOrReturnDefaultValue("KafkaHost", "localhost"))
+	config.KafkaPort = cast.ToInt(getOrReturnDefaultValue("KafkaPort", 9092))
 
 	config.PostgresHost = cast.ToString(getOrReturnDefaultValue("POSTGRES_HOST", "postgres-db"))
 	config.PostgresPort = cast.ToInt(getOrReturnDefaultValue("POSTGRES_PORT", 5432))

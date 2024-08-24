@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Voting service",
-        "title": "Voting service",
+        "description": "Auth service",
+        "title": "Auth service",
         "contact": {},
         "version": "1.0"
     },

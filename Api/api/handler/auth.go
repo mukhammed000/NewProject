@@ -30,7 +30,7 @@ func (h *Handler) SignUp(ctx *gin.Context) {
 		return
 	}
 
-	tkn := token.GenereteJWTToken(&user)
+	tkn := token.GenerateJWTToken(req.Email, "user")
 
 	user.FirstName = req.LastName
 	user.LastName = req.FirstName

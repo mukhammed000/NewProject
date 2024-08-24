@@ -2,6 +2,7 @@ package main
 
 import (
 	"auth/config"
+	"auth/kafka"
 	"auth/service"
 	"auth/storage/postgres"
 	"log"
@@ -27,6 +28,12 @@ func main() {
 		log.Fatal("Error while creating TCP listener", err)
 	}
 	defer lis.Close()
+
+	kafka, err := kafka.NewKafkaProducer([]string{cfg.KafkaHost + cfg.HTTPPort})
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer kafka.Close()
 
 	server := grpc.NewServer()
 	svc := service.NewAuthService(stg)

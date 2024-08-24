@@ -61,7 +61,7 @@ func (s *AuthStorage) SignUp(req *auth.Users) (*auth.SignUpResponse, error) {
 
 	accessToken := req.AccessToken   // Or your token generation logic
 	refreshToken := req.RefreshToken // Or your token generation logic
-	expiresAt := time.Now().Add(15 * time.Minute).Format(time.RFC3339)
+	expiresAt := time.Now().Add(24 * time.Hour).Format(time.RFC3339)
 
 	// SQL query to insert tokens
 	tokenQuery := `
